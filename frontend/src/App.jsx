@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // API Helper - A small object to keep our API calls organized.
 const api = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'https://skillchain-backend.vercel.app',
 
   register: (email, password, name, role) => {
     return fetch(`${api.baseUrl}/auth/register`, {
