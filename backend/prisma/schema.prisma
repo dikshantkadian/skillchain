@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique // We'll use email as the user ID
+  password      String    // The new, essential field for the password!
+  name          String?
+  walletAddress String?   @unique // Wallet is now optional
+  role          Role
+  
+  certificatesIssued   Certificate[] @relation("IssuedBy")
+  certificatesReceived Certificate[] @relation("ReceivedBy")
+}
+
+model Certificate {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  issueDate       DateTime @default(now())
+  transactionHash String   @unique
+  fileHash        String   @unique // The hash of the actual PDF file
+  ipfsCid         String   @unique
+  
+  institution   User     @relation("IssuedBy", fields: [institutionId], references: [id])
+  institutionId String
+
+  student       User     @relation("ReceivedBy", fields: [studentId], references: [id])
+  studentId     String
+}
+
+enum Role {
+  STUDENT
+  INSTITUTION
+  RECRUITER
+}

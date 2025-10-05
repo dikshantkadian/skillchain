@@ -1,0 +1,98 @@
+/* ---------- BASE ---------- */
+:root{
+  --bg:hsl(217, 46%, 27%);
+  --card:#395186;
+  --accent:#4fd1c5;
+  --accent2:#7c5cff;
+  --muted:#9aa7c7;
+  --glass: rgba(255,255,255,0.02);
+  --radius:12px;
+  --btn:#0f96de;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;
+  background: linear-gradient(180deg,#153062 0%, #192a75 100%);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  padding:18px 12px;
+}
+
+/* topbar/header */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:12px 18px;
+  border-radius:10px;
+  margin-bottom:18px;
+}
+.topbar.small{padding:10px 14px}
+.brand{display:flex;gap:12px;align-items:center}
+.brand-logo{width:48px;height:48px;border-radius:8px}
+h1{font-size:18px;margin:0}
+.subtitle{margin:0;color:var(--muted);font-size:13px}
+.link-home{color:var(--muted);text-decoration:none;font-size:14px}
+
+/* containers */
+.container{max-width:1000px;margin:0 auto}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 12px 40px rgba(2,6,23,0.6)}
+.center-card{max-width:520px;margin:0 auto;padding:26px}
+
+/* index */
+.index-body .topbar{background:transparent;border-radius:0;padding:8px 14px}
+.index-main{max-width:1100px;margin:28px auto;text-align:center}
+.hero{margin:12px 0 28px}
+.hero h2{font-size:30px;margin-bottom:6px;color:var(--accent)}
+.hero p{color:var(--muted)}
+.role-grid{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.role-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;width:260px; text-decoration:none;color:inherit;transition:transform .22s, box-shadow .22s;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+.role-card img{width:84px;height:84px}
+.role-card h3{margin:8px 0;color:var(--accent)}
+.role-card p{color:var(--muted);font-size:14px}
+.role-card:hover{transform:translateY(-8px);box-shadow:0 18px 40px rgba(0,0,0,0.8)}
+
+/* forms & inputs */
+.form-row{margin:10px 0;display:flex;flex-direction:column;gap:8px}
+input[type="text"], input[type="password"], input[type="file"], input{
+  padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;font-weight:600
+}
+label{color:var(--muted);font-size:13px}
+
+/* buttons */
+.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:10px 14px;border-radius:10px;color:#02121a;font-weight:700;cursor:pointer;box-shadow:0 8px 26px rgba(79,209,197,0.06)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 12px}
+button, .btn{font-family:Inter,Segoe UI,Arial}
+
+/* nav inside dashboard */
+.dash-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.dash-nav ul{list-style:none;display:flex;gap:8px;padding:0;margin:0}
+.nav-btn{background:transparent;border:none;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.nav-btn.active{background:linear-gradient(90deg, rgba(79,209,197,0.08), rgba(124,92,255,0.05));color:var(--accent)}
+
+/* tables */
+.table{width:100%;border-collapse:collapse;color:var(--muted);font-size:14px}
+.table th{color:#cfeefd;text-align:left;padding:10px 6px;font-weight:700}
+.table td{padding:10px 6px;border-top:1px dashed rgba(255,255,255,0.03)}
+
+/* result area */
+.result-area{margin-top:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted)}
+
+/* student dashboard */
+#certList .cert-card{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+
+/* verify result messages */
+.valid{color:#9ff2e8;background:linear-gradient(90deg, rgba(25,195,122,0.06), rgba(79,209,197,0.02));padding:12px;border-radius:10px}
+.invalid{color:#ffd6d6;background:linear-gradient(90deg, rgba(255,107,107,0.04), rgba(255,107,107,0.02));padding:12px;border-radius:10px}
+
+/* footer */
+.footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px;padding:6px}
+
+/* responsive */
+@media (max-width:720px){
+  .role-grid{flex-direction:column;align-items:center}
+  .card{padding:12px}
+}
