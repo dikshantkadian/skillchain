@@ -9,41 +9,41 @@ export declare class CertificatesService implements OnModuleInit {
     onModuleInit(): void;
     create(title: string, description: string, studentEmail: string, file: Express.Multer.File, institutionId: string): Promise<{
         institution: {
-            email: string;
             name: string | null;
+            email: string;
         };
         student: {
-            email: string;
             name: string | null;
+            email: string;
         };
     } & {
         id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     }>;
     verifyByFileHash(fileHash: string): Promise<{
         institution: {
-            email: string;
             name: string | null;
+            email: string;
         };
         student: {
-            email: string;
             name: string | null;
+            email: string;
         };
     } & {
         id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     }>;
@@ -53,12 +53,12 @@ export declare class CertificatesService implements OnModuleInit {
         };
     } & {
         id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     })[]>;

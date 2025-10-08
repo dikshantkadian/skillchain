@@ -5,41 +5,41 @@ export declare class CertificatesController {
     constructor(certificatesService: CertificatesService);
     issueCertificate(req: any, createCertificateDto: CreateCertificateDto, file: Express.Multer.File): Promise<{
         institution: {
-            email: string;
             name: string | null;
+            email: string;
         };
         student: {
-            email: string;
             name: string | null;
+            email: string;
         };
     } & {
+        id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        id: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     }>;
     verifyCertificate(hash: string): Promise<{
         institution: {
-            email: string;
             name: string | null;
+            email: string;
         };
         student: {
-            email: string;
             name: string | null;
+            email: string;
         };
     } & {
+        id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        id: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     }>;
@@ -48,13 +48,13 @@ export declare class CertificatesController {
             name: string | null;
         };
     } & {
+        id: string;
+        ipfsCid: string;
         title: string;
         description: string;
-        id: string;
-        issueDate: Date;
         transactionHash: string;
         fileHash: string;
-        ipfsCid: string;
+        issueDate: Date;
         institutionId: string;
         studentId: string;
     })[]>;

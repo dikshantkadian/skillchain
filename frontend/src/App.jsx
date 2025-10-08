@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import QRCode from 'react-qr-code';
+import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
+import domtoimage from 'dom-to-image-more';
 
 // API Helper - A small object to keep our API calls organized.
 const api = {
-  baseUrl: 'https://skillchain-backend.vercel.app',
+  baseUrl: 'http://localhost:3000',
 
   register: (email, password, name, role) => {
     return fetch(`${api.baseUrl}/auth/register`, {
@@ -164,8 +167,8 @@ function AuthPage({ setPage, onLogin }) {
               <div className="form-row"><label>Full Name</label><input value={name} onChange={e => setName(e.target.value)} required /></div>
               <div className="form-row"><label>Role</label><select value={role} onChange={e => setRole(e.target.value)}><option value="STUDENT">Student</option><option value="INSTITUTION">Institution</option><option value="RECRUITER">Recruiter</option></select></div>
             </>)}
-            <div className="form-row"><label>Email Address</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>
-            <div className="form-row"><label>Password (min 8 characters)</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} required /></div>
+            <div className="form-row"><label>Email Address</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="user@example.com" /></div>
+            <div className="form-row"><label>Password (min 8 characters)</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" /></div>
             {error && <div className="invalid" style={{marginBottom:'10px'}}>{error}</div>}
             <div className="form-row"><button type="submit" className="btn" disabled={isLoading}>{isLoading ? '...' : (isRegister ? 'Register' : 'Login')}</button></div>
           </form>
@@ -219,7 +222,7 @@ function InstitutionDashboard({ user, token, onLogout }) {
         <section className="card">
           <h3>Issue New Certificate</h3>
           <form onSubmit={handleSubmitCertificate}>
-            <div className="form-row"><label>Student's Email Address</label><input value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} placeholder="e.g., student@test.com" required /></div>
+            <div className="form-row"><label>Student's Email Address</label><input value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} placeholder="student@example.com" required /></div>
             <div className="form-row"><label>Certificate Title</label><input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Hackathon Champion" required /></div>
             <div className="form-row"><label>Description</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the achievement..." required></textarea></div>
             <div className="form-row"><label>Certificate File (PDF, PNG, JPG)</label><input id="uploadFile" type="file" onChange={(e) => setFile(e.target.files[0])} accept=".pdf,.png,.jpg,.jpeg" required /></div>
@@ -245,6 +248,7 @@ function StudentDashboard({ user, token, onLogout }) {
   const [certificates, setCertificates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeQrCode, setActiveQrCode] = useState(null);
 
   useEffect(() => {
     const fetchCertificates = async () => {
@@ -261,7 +265,6 @@ function StudentDashboard({ user, token, onLogout }) {
     fetchCertificates();
   }, [token]);
 
-  // Helper function to copy text to clipboard
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       alert('Hash copied to clipboard!');
@@ -269,6 +272,48 @@ function StudentDashboard({ user, token, onLogout }) {
       alert('Failed to copy hash.');
       console.error('Clipboard copy failed: ', err);
     });
+  };
+
+  const QrModal = ({ cert, onClose }) => {
+    // NEW: A ref to get a direct handle on the QR code DOM element
+    const qrRef = useRef(null);
+  
+    // NEW: The function to handle downloading the QR code
+    const handleDownloadQr = () => {
+      const svgNode = qrRef.current;
+      if (svgNode) {
+        domtoimage.toPng(svgNode)
+          .then((dataUrl) => {
+            const link = document.createElement('a');
+            link.download = `skillchain-qr-${cert.fileHash.slice(0, 10)}.png`;
+            link.href = dataUrl;
+            link.click();
+          })
+          .catch((error) => {
+            console.error('QR Code download failed!', error);
+            alert('Sorry, the QR code could not be downloaded.');
+          });
+      }
+    };
+  
+    return (
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+        <div style={{ background: 'white', padding: '30px', borderRadius: '12px', textAlign: 'center' }}>
+          <h3 style={{ color: '#333', marginTop: 0 }}>{cert.title}</h3>
+          {/* NEW: We attach the ref to the div wrapping the QR code */}
+          <div ref={qrRef} style={{ background: 'white', padding: '16px' }}>
+            <QRCode value={cert.fileHash} size={256} />
+          </div>
+          <p style={{ color: '#555', wordBreak: 'break-all', fontSize: '12px', maxWidth: '280px', marginTop: '15px' }}>
+            File Hash: <code>{cert.fileHash}</code>
+          </p>
+          <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+             <button className="btn ghost" onClick={handleDownloadQr} style={{flex: 1}}>Download QR</button>
+             <button className="btn" onClick={onClose} style={{flex: 1}}>Close</button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -293,16 +338,15 @@ function StudentDashboard({ user, token, onLogout }) {
                       <div style={{fontWeight:800}}>{cert.title}</div>
                       <div className="muted" style={{fontSize:'13px'}}>{cert.description}</div>
                       <div className="muted" style={{fontSize:'12px', marginTop:'8px'}}>Issued by {cert.institution.name} • {new Date(cert.issueDate).toLocaleDateString()}</div>
-                      {/* --- THIS IS THE NEW PART! --- */}
                       <div className="muted" style={{fontSize:'12px', marginTop:'8px', display:'flex', alignItems:'center', gap:'10px'}}>
                         <code className="mono" style={{fontSize:'11px', wordBreak:'break-all'}}>File Hash: {cert.fileHash}</code>
                         <button className="btn ghost" style={{fontSize:'10px', padding:'4px 8px'}} onClick={() => copyToClipboard(cert.fileHash)}>Copy</button>
                       </div>
-                      {/* --- END OF NEW PART --- */}
                     </div>
                     <div style={{textAlign:'right', minWidth: '200px', display:'flex', flexDirection:'column', gap:'5px'}}>
                        <a href={`https://sepolia.etherscan.io/tx/${cert.transactionHash}`} target="_blank" rel="noopener noreferrer" className="btn ghost" style={{fontSize:'12px', padding:'6px 10px'}}>Verify on Etherscan</a>
                        <a href={`https://gateway.pinata.cloud/ipfs/${cert.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="btn ghost" style={{fontSize:'12px', padding:'6px 10px'}}>View Original File</a>
+                       <button onClick={() => setActiveQrCode(cert)} className="btn ghost" style={{fontSize:'12px', padding:'6px 10px'}}>Show QR Code</button>
                     </div>
                   </div>
                 ))
@@ -311,6 +355,7 @@ function StudentDashboard({ user, token, onLogout }) {
           )}
         </section>
       </main>
+      {activeQrCode && <QrModal cert={activeQrCode} onClose={() => setActiveQrCode(null)} />}
     </>
   );
 }
@@ -323,20 +368,43 @@ function RecruiterDashboard({ user, onLogout }) {
   const [hashInput, setHashInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [fileError, setFileError] = useState('');
 
-  const handleVerify = async (event) => {
-    event.preventDefault();
+  const handleVerify = async (hashToVerify) => {
+    if (!hashToVerify) return;
     setIsLoading(true);
     setResult(null);
+    setFileError('');
     try {
-      const response = await fetch(`${api.baseUrl}/certificates/verify/${hashInput}`);
+      const response = await fetch(`${api.baseUrl}/certificates/verify/${hashToVerify}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Verification failed.');
       setResult({ success: true, data });
     } catch (error) { setResult({ success: false, message: error.message }); } 
     finally { setIsLoading(false); }
   };
-
+  
+  const onScanSuccess = (decodedText) => {
+    setIsScanning(false);
+    setHashInput(decodedText);
+    handleVerify(decodedText);
+  };
+  
+  const handleQrFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    setFileError('');
+    const html5QrCode = new Html5Qrcode('qr-file-scanner');
+    try {
+        const decodedText = await html5QrCode.scanFile(file, false);
+        onScanSuccess(decodedText);
+    } catch (err) {
+        setFileError('Could not find a valid QR code in the uploaded image. Please try another file.');
+        console.error(err);
+    }
+  };
+  
   return (
     <>
       <header className="topbar small">
@@ -344,33 +412,80 @@ function RecruiterDashboard({ user, onLogout }) {
         <div><span style={{color:'var(--muted)', fontSize:'13px', marginRight:'15px'}}>Welcome, {user.email}</span><button onClick={onLogout} className="btn ghost">Logout</button></div>
       </header>
       <main className="container">
-        <section className="card center-card">
-          <h2>Verify a Certificate</h2>
-          <p className="muted">Enter the certificate's unique File Hash (SHA-256) to verify its authenticity.</p>
-          <form onSubmit={handleVerify}>
-            <div className="form-row"><input value={hashInput} onChange={(e) => setHashInput(e.target.value)} placeholder="Enter certificate file hash..." required /></div>
-            <div className="form-row"><button type="submit" className="btn" disabled={isLoading}>{isLoading ? 'Verifying...' : 'Verify Hash'}</button></div>
-          </form>
-          {result && (
-            <div className="result-area">
-              {result.success ? (
-                <div className="valid">
-                  ✅ **Valid Hash — Certificate Verified!**
-                  <div className="muted" style={{fontSize:'13px', marginTop:'10px'}}>
-                    <p style={{margin: '5px 0'}}><strong>Title:</strong> {result.data.title}</p>
-                    <p style={{margin: '5px 0'}}><strong>Student:</strong> {result.data.student.name} ({result.data.student.email})</p>
-                    <p style={{margin: '5px 0'}}><strong>Institution:</strong> {result.data.institution.name}</p>
-                    <p style={{margin: '5px 0'}}><strong>Issued On:</strong> {new Date(result.data.issueDate).toLocaleDateString()}</p>
-                    <p style={{margin: '5px 0'}}><a href={`https://gateway.pinata.cloud/ipfs/${result.data.ipfsCid}`} target="_blank" rel="noopener noreferrer" style={{color:'inherit'}}>View Original File on IPFS</a></p>
-                  </div>
-                </div>
-              ) : ( <div className="invalid">❌ Invalid Hash — {result.message}</div> )}
+        {isScanning ? (
+          <section className="card center-card">
+            <h2>Scan or Upload QR Code</h2>
+            <div id="qr-reader" style={{width: '100%', maxWidth: '400px', margin: '0 auto', border: '1px solid var(--muted)', borderRadius: '12px'}}></div>
+            <Scanner onScanSuccess={onScanSuccess} />
+            <hr style={{margin: '20px 0', borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.1)'}} />
+            <div className="form-row">
+              <label>Or upload QR code image</label>
+              <input type="file" accept="image/*" onChange={handleQrFileUpload} />
             </div>
-          )}
-        </section>
+            {fileError && <div className="invalid" style={{marginTop: '10px'}}>{fileError}</div>}
+            <button onClick={() => setIsScanning(false)} className="btn ghost" style={{marginTop:'20px'}}>Cancel</button>
+          </section>
+        ) : (
+          <section className="card center-card">
+            <h2>Verify a Certificate</h2>
+            <p className="muted">Enter the certificate's File Hash or scan/upload a QR code.</p>
+            <form onSubmit={(e) => { e.preventDefault(); handleVerify(hashInput); }}>
+              <div className="form-row"><input value={hashInput} onChange={(e) => setHashInput(e.target.value)} placeholder="Enter certificate file hash..." required /></div>
+              <div className="form-row" style={{flexDirection: 'row', gap: '10px'}}>
+                  <button type="submit" className="btn" disabled={isLoading} style={{flex: 1}}>{isLoading ? 'Verifying...' : 'Verify Hash'}</button>
+                  <button type="button" onClick={() => { setIsScanning(true); setResult(null); }} className="btn" style={{flex: 1}}>Scan/Upload QR</button>
+              </div>
+            </form>
+            {result && (
+              <div className="result-area">
+                {result.success ? (
+                  <div className="valid">
+                    ✅ **Valid Hash — Certificate Verified!**
+                    <div className="muted" style={{fontSize:'13px', marginTop:'10px'}}>
+                      <p style={{margin: '5px 0'}}><strong>Title:</strong> {result.data.title}</p>
+                      <p style={{margin: '5px 0'}}><strong>Student:</strong> {result.data.student.name} ({result.data.student.email})</p>
+                      <p style={{margin: '5px 0'}}><strong>Institution:</strong> {result.data.institution.name}</p>
+                      <p style={{margin: '5px 0'}}><strong>Issued On:</strong> {new Date(result.data.issueDate).toLocaleDateString()}</p>
+                      <p style={{margin: '5px 0'}}><a href={`https://gateway.pinata.cloud/ipfs/${result.data.ipfsCid}`} target="_blank" rel="noopener noreferrer" style={{color:'inherit'}}>View Original File on IPFS</a></p>
+                    </div>
+                  </div>
+                ) : ( <div className="invalid">❌ Invalid Hash — {result.message}</div> )}
+              </div>
+            )}
+          </section>
+        )}
       </main>
+      <div id="qr-file-scanner" style={{display: 'none'}}></div>
     </>
   );
+}
+
+// A dedicated component to handle the scanner logic
+function Scanner({ onScanSuccess }) {
+  useEffect(() => {
+    let html5QrcodeScanner;
+    const qrReaderElement = document.getElementById('qr-reader');
+    
+    if (qrReaderElement) {
+      const config = { 
+        qrbox: { width: 250, height: 250 },
+        fps: 10,
+        rememberLastUsedCamera: true
+      };
+      html5QrcodeScanner = new Html5QrcodeScanner('qr-reader', config, false);
+      html5QrcodeScanner.render(onScanSuccess, console.warn);
+    }
+
+    return () => {
+      if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) { // 2 is SCANNING state
+        html5QrcodeScanner.clear().catch(error => {
+            console.error("Failed to clear scanner on unmount.", error);
+        });
+      }
+    };
+  }, [onScanSuccess]);
+
+  return null;
 }
 
 export default App;
