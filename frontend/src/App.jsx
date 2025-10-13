@@ -3,7 +3,7 @@ import QRCode from 'react-qr-code';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import domtoimage from 'dom-to-image-more';
 
-// API Helper - A small object to keep our API calls organized.
+// API Helper - An object to keep our API calls organized.
 const api = {
   baseUrl: 'http://localhost:3000',
 
@@ -33,7 +33,7 @@ const api = {
 };
 
 
-// The main App component - This is the "brain" of our frontend.
+// The main App component
 function App() {
   const [page, setPage] = useState('home');
   const [user, setUser] = useState(null);
