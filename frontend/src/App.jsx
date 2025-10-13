@@ -5,7 +5,7 @@ import domtoimage from 'dom-to-image-more';
 
 // API Helper - An object to keep our API calls organized.
 const api = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: import.meta.env.VITE_API_BASE_URL,
 
   register: (email, password, name, role) => {
     return fetch(`${api.baseUrl}/auth/register`, {
