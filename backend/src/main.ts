@@ -5,8 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // This is the most important line!
-  // It tells the bouncer to allow calls from other addresses.
+
   app.enableCors(); 
 
   app.useGlobalPipes(new ValidationPipe());
