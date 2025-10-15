@@ -1,5 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Add this line to specify the correct engine for Vercel
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -8,13 +10,12 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique // We'll use email as the user ID
-  password      String    // The new, essential field for the password!
-  name          String?
-  walletAddress String?   @unique // Wallet is now optional
-  role          Role
-  
+  id                   String        @id @default(uuid())
+  email                String        @unique
+  password             String
+  name                 String?
+  walletAddress        String?       @unique
+  role                 Role
   certificatesIssued   Certificate[] @relation("IssuedBy")
   certificatesReceived Certificate[] @relation("ReceivedBy")
 }
@@ -25,14 +26,12 @@ model Certificate {
   description     String
   issueDate       DateTime @default(now())
   transactionHash String   @unique
-  fileHash        String   @unique // The hash of the actual PDF file
+  fileHash        String   @unique
   ipfsCid         String   @unique
-  
-  institution   User     @relation("IssuedBy", fields: [institutionId], references: [id])
-  institutionId String
-
-  student       User     @relation("ReceivedBy", fields: [studentId], references: [id])
-  studentId     String
+  institution     User     @relation("IssuedBy", fields: [institutionId], references: [id])
+  institutionId   String
+  student         User     @relation("ReceivedBy", fields: [studentId], references: [id])
+  studentId       String
 }
 
 enum Role {
@@ -40,3 +39,4 @@ enum Role {
   INSTITUTION
   RECRUITER
 }
+
