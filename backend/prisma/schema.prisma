@@ -1,7 +1,9 @@
 generator client {
-  provider      = "prisma-client-js"
-  engineType    = "node-api"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
+  // Force Prisma to use the binary engine, which is more compatible with Vercel
+  engineType = "binary"
+  // Add binary targets for Vercel's Linux environment for broad compatibility
+  binaryTargets = ["native", "debian-openssl-1.1.x", "rhel-openssl-1.1.x"]
 }
 
 datasource db {
@@ -10,16 +12,14 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password      String
-  name          String?
-  walletAddress String?   @unique
-  role          Role
+  id                   String        @id @default(uuid())
+  email                String        @unique
+  password             String
+  name                 String?
+  walletAddress        String?       @unique
+  role                 Role
   certificatesIssued   Certificate[] @relation("IssuedBy")
   certificatesReceived Certificate[] @relation("ReceivedBy")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }
 
 model Certificate {
@@ -34,8 +34,6 @@ model Certificate {
   institutionId   String
   student         User     @relation("ReceivedBy", fields: [studentId], references: [id])
   studentId       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 }
 
 enum Role {
@@ -43,3 +41,4 @@ enum Role {
   INSTITUTION
   RECRUITER
 }
+
