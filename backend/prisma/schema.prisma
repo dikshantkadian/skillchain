@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
   engineType    = "node-api"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -16,10 +16,8 @@ model User {
   name          String?
   walletAddress String?   @unique
   role          Role
-
   certificatesIssued   Certificate[] @relation("IssuedBy")
   certificatesReceived Certificate[] @relation("ReceivedBy")
-
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -32,13 +30,10 @@ model Certificate {
   transactionHash String   @unique
   fileHash        String   @unique
   ipfsCid         String   @unique
-
   institution     User     @relation("IssuedBy", fields: [institutionId], references: [id])
   institutionId   String
-
   student         User     @relation("ReceivedBy", fields: [studentId], references: [id])
   studentId       String
-
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
